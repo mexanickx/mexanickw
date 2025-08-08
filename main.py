@@ -22,10 +22,21 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ===== НАСТРОЙКИ =====
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-if not BOT_TOKEN:
-    logging.error("❌ BOT_TOKEN не найден в переменных окружения!")
-    exit(1)
+def validate_token(token: str) -> bool:
+    """Проверка формата токена"""
+    return token and len(token.split(':')) == 2 and token.split(':')[0].isdigit()
+
+# Улучшенная загрузка переменных
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+if not BOT_TOKEN or not validate_token(BOT_TOKEN):
+    logging.error("❌ ОШИБКА: Неверный или отсутствующий BOT_TOKEN!")
+    logging.error("Проверьте:")
+    logging.error("1. Наличие BOT_TOKEN в настройках Render")
+    logging.error("2. Формат токена (должен быть вида '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11')")
+    sys.exit(1)
+
+bot = Bot(token=BOT_TOKEN)
+logging.info("✅ Токен успешно загружен")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
