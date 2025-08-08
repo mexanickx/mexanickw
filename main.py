@@ -48,7 +48,7 @@ logging.basicConfig(
 bot = Bot(token=BOT_TOKEN)
 logging.info("✅ Токен успешно загружен")
 
-ADMIN_IDS = set(map(int, os.getenv('ADMIN_IDS', '').split(',')) if os.getenv('ADMIN_IDS') else set()
+ADMIN_IDS = set(map(int, os.getenv('ADMIN_IDS', '').split(','))) if os.getenv('ADMIN_IDS') else set()
 dp = Dispatcher(storage=MemoryStorage())
 
 # ===== СОСТОЯНИЯ FSM =====
