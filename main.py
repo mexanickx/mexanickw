@@ -23,6 +23,12 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ===== НАСТРОЙКИ =====
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+if not BOT_TOKEN:
+    logging.error("❌ BOT_TOKEN не найден в переменных окружения!")
+    exit(1)
+
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
 ADMIN_IDS = set(map(int, os.getenv('ADMIN_IDS', '').split(','))) if os.getenv('ADMIN_IDS') else set()
 
 # ===== СОСТОЯНИЯ FSM =====
