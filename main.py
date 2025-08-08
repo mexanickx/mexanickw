@@ -20,6 +20,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from dotenv import load_dotenv
+load_dotenv()  # Загружает переменные из .env для локальной разработки
+
+BOT_TOKEN = os.getenv('BOT_TOKEN') or os.environ.get('BOT_TOKEN')
 
 # ===== НАСТРОЙКИ =====
 def validate_token(token: str) -> bool:
