@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: contest-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: BOT_TOKEN
+        valueFrom: 
+      - key: ADMIN_IDS
+        valueFrom: 
+    port: 8080
+    plan: free
