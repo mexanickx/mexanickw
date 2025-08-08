@@ -867,17 +867,42 @@ async def start_server():
     logging.info("HTTP server started on port 8080")
 
 # ===== ЗАПУСК БОТА =====
+async def health_check(request):
+    """Endpoint для проверки работоспособности"""
+    return web.json_response({
+        "status": "OK",
+        "bot": "running",
+        "timestamp": str(datetime.now())
+    })
+
+async def start_web_server():
+    """Запуск веб-сервера на порту 8080"""
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    app.router.add_get('/health', health_check)
+    
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080)
+    await site.start()
+    logging.info("🌐 Веб-сервер запущен на порту 8080")
+
+# ===== ОСНОВНОЙ КОД БОТА =====
+@dp.message(CommandStart())
+async def cmd_start(message: Message):
+    await message.answer("Привет! Бот работает ✅")
+
+# ===== ЗАПУСК ПРИЛОЖЕНИЯ =====
 async def main():
-    await asyncio.gather(
-        dp.start_polling(bot),
-        start_server()
-    )
+    try:
+        await asyncio.gather(
+            dp.start_polling(bot),
+            start_web_server()
+        )
+    except Exception as e:
+        logging.error(f"🚨 Критическая ошибка: {e}")
+    finally:
+        await bot.session.close()
 
 if __name__ == "__main__":
-    try:
-        logging.info("Starting bot...")
-        asyncio.run(main())
-    except Exception as e:
-        logging.error(f"Bot crashed: {e}")
-    finally:
-        logging.info("Bot stopped")
+    asyncio.run(main())
