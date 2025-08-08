@@ -3,6 +3,8 @@ import logging
 import asyncio
 import random
 import uuid
+import sys
+from datetime import datetime
 from typing import Dict, List, Set
 from aiohttp import web
 from aiogram import Bot, Dispatcher, types
@@ -21,9 +23,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv
-load_dotenv()  # Загружает переменные из .env для локальной разработки
 
-BOT_TOKEN = os.getenv('BOT_TOKEN') or os.environ.get('BOT_TOKEN')
+load_dotenv()  # Загружает переменные из .env для локальной разработки
 
 # ===== НАСТРОЙКИ =====
 def validate_token(token: str) -> bool:
@@ -39,12 +40,16 @@ if not BOT_TOKEN or not validate_token(BOT_TOKEN):
     logging.error("2. Формат токена (должен быть вида '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11')")
     sys.exit(1)
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 bot = Bot(token=BOT_TOKEN)
 logging.info("✅ Токен успешно загружен")
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
-ADMIN_IDS = set(map(int, os.getenv('ADMIN_IDS', '').split(','))) if os.getenv('ADMIN_IDS') else set()
+ADMIN_IDS = set(map(int, os.getenv('ADMIN_IDS', '').split(',')) if os.getenv('ADMIN_IDS') else set()
+dp = Dispatcher(storage=MemoryStorage())
 
 # ===== СОСТОЯНИЯ FSM =====
 class ContestStates(StatesGroup):
@@ -61,14 +66,6 @@ contests: Dict[str, Dict] = {}
 participants: Dict[str, List[Dict]] = {}
 results_links: Dict[str, str] = {}
 unique_users: Set[int] = set()
-
-# ===== ИНИЦИАЛИЗАЦИЯ =====
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(storage=MemoryStorage())
 
 # ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 def is_admin(user_id: int) -> bool:
@@ -219,7 +216,7 @@ async def publish_contest(message: Message, state: FSMContext):
 
         contest_id = generate_contest_id(is_fast=False)
         text = (
-            f"🎉 КОНКУРС 🎉\n\n"
+            f"🎉 КОНКУРС �\n\n"
             f"Условия: {data['conditions']}\n\n"
             f"Подписаться на: {', '.join(f'@{ch}' for ch in data['channels'])}\n\n"
             f"Победителей: {data['winner_count']}"
@@ -869,19 +866,6 @@ async def inline_query_handler(query: InlineQuery):
             cache_time=1
         )
 
-async def handle(request):
-    return web.Response(text="Bot is running")
-
-async def start_server():
-    app = web.Application()
-    app.router.add_get('/', handle)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8080)
-    await site.start()
-    logging.info("HTTP server started on port 8080")
-
-# ===== ЗАПУСК БОТА =====
 async def health_check(request):
     """Endpoint для проверки работоспособности"""
     return web.json_response({
@@ -902,12 +886,6 @@ async def start_web_server():
     await site.start()
     logging.info("🌐 Веб-сервер запущен на порту 8080")
 
-# ===== ОСНОВНОЙ КОД БОТА =====
-@dp.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer("Привет! Бот работает ✅")
-
-# ===== ЗАПУСК ПРИЛОЖЕНИЯ =====
 async def main():
     try:
         await asyncio.gather(
