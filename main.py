@@ -534,7 +534,7 @@ async def publish_results(message: Message, state: FSMContext):
             updated_text = f"{contest['conditions']}\n\n{winners_text}"
         else:
             updated_text = (
-                f"🎉 КОНКУРС 🎉\n\n"
+                f"🎉КОНКУРС🎉\n\n"
                 f"Условия: {contest['conditions']}\n\n"
                 f"Подписаться на: {', '.join(f'@{ch}' for ch in contest['channels'])}\n\n"
                 f"Победителей: {contest['winner_count']}\n\n"
